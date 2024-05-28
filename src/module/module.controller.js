@@ -35,7 +35,7 @@ export const postModule = async ( req, res ) => {
 // Get all modules
 export const getModules = async ( req, res ) => {
     try {
-        const modules = await Module.find().populate( 'form' );
+        const modules = await Module.find()
 
         res.status( 200 ).json( modules );
     } catch ( error ) {
@@ -51,7 +51,7 @@ export const getModules = async ( req, res ) => {
 export const putModule = async ( req, res ) => {
     try {
         const moduleId = req.params.id;
-        const { _id, ...moduleData } = req.body;
+        const { _id, archivos, ...moduleData } = req.body;
 
         let module = await Module.findById( moduleId );
 
@@ -109,6 +109,50 @@ export const deleteModule = async ( req, res ) => {
         } );
     }
 };
+
+// Add URLs to an existing module without overwriting
+export const addUrlsToModule = async ( req, res ) => {
+    try {
+        const moduleId = req.params.id;
+        const { newUrls } = req.body; // Assume the new URLs are sent in an array called 'newUrls'
+
+        // Find the module by ID
+        let module = await Module.findById( moduleId );
+
+        // Check if the module was found
+        if ( !module ) {
+            return res.status( 404 ).json( { msg: 'Module not found.' } );
+        }
+
+        // Validate the new URLs
+        const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
+        const invalidUrls = newUrls.filter( url => !urlRegex.test( url ) );
+
+        if ( invalidUrls.length > 0 ) {
+            return res.status( 400 ).json( { msg: 'Invalid URL detected.', invalidUrls } );
+        }
+
+        // Append the new URLs to the existing 'archivos' array
+        module.archivos.push( ...newUrls );
+
+        // Save the updated module
+        const updatedModule = await module.save();
+
+        // Respond with the updated module
+        res.status( 201 ).json( {
+            message: 'URLs added to the module',
+            updatedModule
+        } );
+    } catch ( error ) {
+        console.error( error );
+        res.status( 500 ).json( {
+            msg: 'Error adding URLs to the module.',
+            error: error.message
+        } );
+    }
+}
+
+
 
 
 
