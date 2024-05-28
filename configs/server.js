@@ -8,6 +8,9 @@ class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT;
+        this.coursePath = '/api/v1/course'
+
+
         this.conectarDB(); 
         this.middlewares();
         this.routes();
@@ -28,6 +31,7 @@ class Server {
 
    
     routes() {  
+        this.app.use(this.coursePath, courseRoutes);
 
     };
 
