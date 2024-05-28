@@ -1,4 +1,4 @@
-import User from '../user/user.js'; 
+/*import User from '../user/user.js'; 
 
 export const validarRol = async (req, res, next) => {
     try {
@@ -20,3 +20,4 @@ export const validarRol = async (req, res, next) => {
         res.status(500).json({ mensaje: 'Error interno del servidor' });
     }
 };
+*/

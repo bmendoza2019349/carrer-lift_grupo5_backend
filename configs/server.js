@@ -3,7 +3,7 @@ import cors from 'cors'
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { dbConnection } from './mongo.js';
-
+import courseRoutes from '../src/course/course.routes.js'
 class Server {
     constructor() {
         this.app = express();
