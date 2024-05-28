@@ -3,11 +3,18 @@ import cors from 'cors'
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { dbConnection } from './mongo.js';
+import authRoutes from '../src/auth/auth.routes.js'
+import '../src/users/initUsers.js'
+import moduleRoutes from '../src/module/module.routes.js'
+import courseRoutes from '../src/course/course.routes.js'
 
 class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT;
+        this.authPath = '/carrerLiftApi/v1/auth'
+        this.modulePath = '/carrerLiftApi/v1/modules'
+        this.coursePath = '/carrerLiftApi/v1/course'
         this.conectarDB(); 
         this.middlewares();
         this.routes();
@@ -28,7 +35,9 @@ class Server {
 
    
     routes() {  
-
+        this.app.use(this.authPath, authRoutes);
+        this.app.use( this.modulePath, moduleRoutes );
+        this.app.use(this.coursePath, courseRoutes);
     };
 
     listen() {
