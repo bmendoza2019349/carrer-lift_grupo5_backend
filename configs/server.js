@@ -3,38 +3,40 @@ import cors from 'cors'
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { dbConnection } from './mongo.js';
+import moduleRoutes from '../src/module/module.routes.js'
 
 class Server {
     constructor() {
         this.app = express();
         this.port = process.env.PORT;
-        this.conectarDB(); 
+        this.modulePath = '/CarreerLift/v1/modules'
+        this.conectarDB();
         this.middlewares();
         this.routes();
     }
 
-    async conectarDB() {
+    async conectarDB () {
         await dbConnection();
     }
 
-    
-    middlewares() {
-        this.app.use(express.urlencoded({ extended: false }));
-        this.app.use(cors());
-        this.app.use(express.json());
-        this.app.use(helmet());
-        this.app.use(morgan('dev'));
+
+    middlewares () {
+        this.app.use( express.urlencoded( { extended: false } ) );
+        this.app.use( cors() );
+        this.app.use( express.json() );
+        this.app.use( helmet() );
+        this.app.use( morgan( 'dev' ) );
     };
 
-   
-    routes() {  
 
+    routes () {
+        this.app.use( this.modulePath, moduleRoutes );
     };
 
-    listen() {
-        this.app.listen(this.port, () => {
-            console.log('Server running on port ', this.port);
-        });
+    listen () {
+        this.app.listen( this.port, () => {
+            console.log( 'Server running on port ', this.port );
+        } );
     }
 }
 
