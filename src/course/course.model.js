@@ -1,21 +1,25 @@
 import mongoose from 'mongoose';
 
 const CourseSchema = new mongoose.Schema({
+    userCreator: {
+        type: String,
+        required: [true, "user Creator is required"]
+    },
     nameCourse: {
         type: String,
         required: [true, "Course name is required"]
     },
-    descripcionCourse: {
+    descripcion: {
         type: String,
         required: [true, "Course description is required"]
     },
-    estadoCourse: {
+    // modulos: [ModulosSchema],  Cambiado para que los comentarios sean objetos con las propiedades adecuadas
+    img:{
+        type: String
+    },
+    state: {
         type: Boolean,
         default: true
-    },
-    modulos: {
-        type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Module' }],
-        default: []
     }
 });
 
