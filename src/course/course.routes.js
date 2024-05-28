@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
 import { validateFields } from '../middlewares/validate-fields.js';
-import { coursePost, coursePut, courseGet } from './course.controller.js'; 
+import { coursePost, coursePut, courseGet, courseDelete } from './course.controller.js'; 
 // import { validarRol } from '../middlewares/rol-validator.js';
 
 const router = Router();
+
+router.get("/", courseGet);
 
 router.post(
     "/",
@@ -27,6 +29,12 @@ router.put(
         // validarRol
     ], coursePut);
 
-router.get("/", courseGet);
+router.delete(
+    "/:id",
+    [
+        check("id", "The course ID must be a valid MongoDB format").isMongoId(),
+        validateFields,
+        // validarRol
+    ], courseDelete);
 
 export default router;

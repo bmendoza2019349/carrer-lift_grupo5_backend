@@ -17,7 +17,7 @@ const CourseSchema = new mongoose.Schema({
     img:{
         type: String
     },
-    state: {
+    status: {
         type: Boolean,
         default: true
     }
