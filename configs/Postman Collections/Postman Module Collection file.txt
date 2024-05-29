@@ -41,7 +41,7 @@ url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/(id del modulo)
 //////////////////////////////////////////////
 
 Edit new index (patch)
-url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/newIndex/66567b147369259ae4590e5b
+url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/newIndex/(id del modulo)
 
 {
     "index": 0, (debe ser numerico, sin comillas)
