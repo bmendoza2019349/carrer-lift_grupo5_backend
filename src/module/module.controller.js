@@ -12,7 +12,7 @@ export const postModule = async ( req, res ) => {
 
         const savedModule = await newModule.save();
 
-        res.json( {
+        res.status( 201 ).json( {
             message: 'Module Created',
             savedModule
         } );
