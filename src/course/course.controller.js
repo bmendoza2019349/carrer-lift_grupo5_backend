@@ -3,7 +3,9 @@ import { response } from 'express';
 
 export const coursePost = async (req, res) => {
     try {
-        const { userCreator, nameCourse, descripcion, img } = req.body;
+        const {nameCourse, descripcion, img } = req.body;
+
+        userCreator = req.user.email
         const course = new Course({ userCreator, nameCourse, descripcion, img });
         
         await course.save();

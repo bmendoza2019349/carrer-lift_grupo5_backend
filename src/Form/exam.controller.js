@@ -1,10 +1,11 @@
 import Exam from "./exam.model.js";
 import Response from './response.model.js';
 import User from "../users/user.model.js";
+import Module from "../module/module.model.js";
 
 export const createExam = async (req, res) => {
     try {
-        const { title, questions, totalPoints } = req.body;
+        const { title, questions, totalPoints, moduleId } = req.body;
         const userId = req.user.id;
 
         const user = await User.findById(userId);
@@ -24,6 +25,15 @@ export const createExam = async (req, res) => {
         });
 
         await exam.save();
+
+        // Añadir el examen al módulo
+        const module = await Module.findById(moduleId);
+        if (!module) {
+            return res.status(404).send("Module not found");
+        }
+
+        module.exams.push(exam._id);
+        await module.save();
 
         return res
             .status(200)

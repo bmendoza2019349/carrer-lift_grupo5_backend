@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Module from '../module/module.model.js';
 
 const CourseSchema = new mongoose.Schema({
     userCreator: {
@@ -13,7 +14,12 @@ const CourseSchema = new mongoose.Schema({
         type: String,
         required: [true, "Course description is required"]
     },
-    // modulos: [ModulosSchema],  Cambiado para que los comentarios sean objetos con las propiedades adecuadas
+
+    modulos: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Module'
+    }],
+
     img:{
         type: String
     },

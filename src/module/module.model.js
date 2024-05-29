@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import Exam from '../Form/exam.model.js';
 
 const moduleSchema = new mongoose.Schema( {
     nameModule: {
@@ -21,6 +22,11 @@ const moduleSchema = new mongoose.Schema( {
         type: String,
         required: [true, 'A description for this module is required'],
     },
+    exams: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Exam'
+    }]
+
 
 } );
 
