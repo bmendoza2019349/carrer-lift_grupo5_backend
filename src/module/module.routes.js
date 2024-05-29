@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { check } from "express-validator";
-import { postModule, getModules, putModule, deleteModule, addUrlsToModule } from "./module.controller.js";
+import { postModule, getModules, putModule, deleteModule, addUrlsToModule, updateSpecificIndex } from "./module.controller.js";
 import { validateFields } from "../middlewares/validateFields.js";
 
 const router = Router();
@@ -26,5 +26,10 @@ router.patch( '/:id', [
     // check an array of urls called newUrls
     check( 'newUrls' ).isURL().withMessage( 'Invalid URL' ),
 ], addUrlsToModule );
+
+router.patch( '/newIndex/:id', [
+    validateFields,
+    check( 'index' ).isNumeric().withMessage( 'Invalid index' ),
+], updateSpecificIndex );
 
 export default router;
