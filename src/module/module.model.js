@@ -25,7 +25,11 @@ const moduleSchema = new mongoose.Schema( {
     exams: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Exam'
-    }]
+    }],
+    state:{
+        type: String,
+        enum: ["habilitado", "deshabilitado", "enActivacion"]
+    }
 
 
 } );

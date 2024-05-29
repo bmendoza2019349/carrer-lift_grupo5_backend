@@ -1,5 +1,6 @@
 import bcryptjs from 'bcryptjs';
 import Users from '../users/user.model.js';
+import Course from '../course/course.model.js';
 import { generarJWT } from '../helpers/generate-JWT.js';
 
 export const register = async (req, res) => {
@@ -47,16 +48,56 @@ export const login = async (req, res) => {
       return res.status(400).send("wrong password");
     }
 
-    const token = await generarJWT(user.id, user.email);
+    const token = await generarJWT(user.id, user.email, user.roleUser);
 
     res.status(200).json({
       msg: "Login Ok!!!",
       userDetails: {
         username: user.username,
+        roleUser: user.roleUser,
         token: token,
       },
     });
   } catch (e) {
     res.status(500).send("Comuniquese con el administrador");
+  }
+};
+
+export const assignCourse = async (req, res) => {
+  try {
+      const { codigo } = req.body;
+      const userEmail = req.user.email; // Obteniendo el email del token
+      const userRole = req.user.roleUser; // Obteniendo el rol del usuario del token
+
+      // Verificar si el usuario tiene el rol de "alumno" o "superAdmin"
+      if (userRole !== 'alumno' && userRole !== 'superAdmin') {
+          return res.status(403).send('Only students or superAdmins can assign courses');
+      }
+
+      // Buscar el curso por código
+      const course = await Course.findOne({ codigo });
+      if (!course) {
+          return res.status(404).send('Course not found');
+      }
+
+      // Buscar el usuario por email
+      const user = await Users.findOne({ email: userEmail });
+      if (!user) {
+          return res.status(404).send('User not found');
+      }
+
+      // Verificar si el curso ya está asignado al usuario
+      if (user.courses.includes(course._id)) {
+          return res.status(400).send('Course already assigned');
+      }
+
+      // Asignar el curso al usuario
+      user.courses.push(course._id);
+      await user.save();
+
+      res.status(200).send('Course assigned successfully');
+  } catch (error) {
+      console.log(error);
+      res.status(500).send('Internal Server Error');
   }
 };

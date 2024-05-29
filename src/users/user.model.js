@@ -1,6 +1,6 @@
 import mongoose, {Schema} from "mongoose";
 
-const roles = ['admin', 'user', 'superAdmin'];
+const roles = ['profesor', 'alumno', 'superAdmin'];
 
 const UserSchema = mongoose.Schema({
     email: {
@@ -16,8 +16,12 @@ const UserSchema = mongoose.Schema({
     roleUser: {
         type: String,
         enum: roles,
-        require: true,
+        default: "alumno"
     },
+    courses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
+    }],
     stateUser: {
         type: Boolean,
         require: true 

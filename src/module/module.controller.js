@@ -12,22 +12,13 @@ export const postModule = async ( req, res ) => {
 
         const savedModule = await newModule.save();
 
-        res.json( {
-            message: 'Module Created',
-            savedModule
-        } );
+        res.status(200).send(`The module was added successfully`);
     } catch ( error ) {
         console.error( error );
         if ( error.name === 'ValidationError' ) {
-            res.status( 500 ).json( {
-                msg: 'Error within module validation, check every field',
-                error: error.message
-            } );
+            res.status( 500 ).send( 'Error within module validation, check every field');
         } else {
-            res.status( 500 ).json( {
-                msg: 'Error adding the module.',
-                error: error.message
-            } );
+            res.status( 500 ).send( 'Error adding the module.');
         }
     }
 };
@@ -40,10 +31,7 @@ export const getModules = async ( req, res ) => {
         res.status( 200 ).json( modules );
     } catch ( error ) {
         console.error( error );
-        res.status( 500 ).json( {
-            msg: 'Error retrieving modules.',
-            error: error.message
-        } );
+        res.status( 500 ).send( 'Error retrieving modules.');
     }
 };
 
