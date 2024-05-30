@@ -111,3 +111,22 @@ export const courseDelete = async (req, res) => {
         res.status(500).send('Internal Server Error course');
     }
 };
+
+export const getCourseById = async (req, res) => {
+    try {
+        const {id} = req.params;
+
+        const course = await Course.findById(id);
+
+        if(!course){
+            return res.status(404).send('Course not found');
+        }
+
+        res.status(200).json({
+            course
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error course');
+    }
+}
