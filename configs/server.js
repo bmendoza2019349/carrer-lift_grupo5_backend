@@ -8,6 +8,7 @@ import '../src/users/initUsers.js'
 import moduleRoutes from '../src/module/module.routes.js'
 import courseRoutes from '../src/course/course.routes.js'
 import formRoutes from '../src/Form/exam.routes.js'
+import userRoutes from '../src/users/user.routes.js'
 
 class Server {
     constructor() {
@@ -17,6 +18,7 @@ class Server {
         this.modulePath = '/carrerLiftApi/v1/modules'
         this.coursePath = '/carrerLiftApi/v1/course'
         this.formPath = '/carrerLiftApi/v1/form'
+        this.userPath = '/carrerLiftApi/v1/user'
         this.conectarDB(); 
         this.middlewares();
         this.routes();
@@ -41,6 +43,7 @@ class Server {
         this.app.use( this.modulePath, moduleRoutes );
         this.app.use(this.coursePath, courseRoutes);
         this.app.use(this.formPath, formRoutes);
+        this.app.use(this.userPath, userRoutes);
     };
 
     listen() {
