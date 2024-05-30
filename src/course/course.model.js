@@ -1,10 +1,44 @@
 import mongoose from 'mongoose';
-import Module from '../module/module.model.js';
 
 // Función para generar un código aleatorio de 6 caracteres
 const generateRandomCode = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 };
+
+const moduleSchema = new mongoose.Schema( {
+    nameModule: {
+        type: String,
+        required: [true, 'A name for this module is required'],
+        unique: true,
+    },
+
+    archivos: [{
+        type: String,
+        validate: {
+            validator: function ( val ) {
+                const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
+                return urlRegex.test( val );
+            },
+            message: 'Invalid URL'
+        }
+    }],
+    descriptionModule: {
+        type: String,
+        required: [true, 'A description for this module is required'],
+    },
+    exams: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Exam'
+    }],
+    state:{
+        type: String,
+        enum: ["habilitado", "deshabilitado", "enActivacion"],
+        default: "habilitado"
+    }
+
+
+} );
+
 
 const CourseSchema = new mongoose.Schema({
     userCreator: {
@@ -20,10 +54,7 @@ const CourseSchema = new mongoose.Schema({
         required: [true, "Course description is required"]
     },
 
-    modulos: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Module'
-    }],
+    modulos: [moduleSchema],
 
     codigo: {
         type: String,

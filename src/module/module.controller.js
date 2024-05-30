@@ -1,144 +1,202 @@
 import { response, request } from "express";
-import Module from './module.model.js';
+import Course from '../course/course.model.js';
+
 // Add a new module
-export const postModule = async ( req, res ) => {
+export const postModule = async (req, res) => {
     try {
-        const { _id, ...moduleData } = req.body;
+        const { id } = req.params;
+        const { nameModule, archivos, descriptionModule, exams, state } = req.body;
+        const userEmail = req.user.email; // Obteniendo el email del token
 
-        const newModule = new Module( {
-            _id,
-            ...moduleData
-        } );
+        const course = await Course.findById(id);
 
-        const savedModule = await newModule.save();
+        if (!course) {
+            return res.status(404).send('Course not found');
+        }
 
-        res.status(200).send(`The module was added successfully`);
-    } catch ( error ) {
-        console.error( error );
-        if ( error.name === 'ValidationError' ) {
-            res.status( 500 ).send( 'Error within module validation, check every field');
+        if (course.userCreator !== userEmail) {
+            return res.status(403).send('Only the course creator can add modules');
+        }
+
+        const newModule = {
+            nameModule,
+            archivos,
+            descriptionModule,
+            exams,
+            state
+        };
+
+        course.modulos.push(newModule);
+
+        await course.save();
+
+        res.status(200).json({
+            msg: 'Module added successfully',
+            course
+        });
+    } catch (error) {
+        console.error(error);
+        if (error.name === 'ValidationError') {
+            res.status(500).send('Error within module validation, check every field');
         } else {
-            res.status( 500 ).send( 'Error adding the module.');
+            res.status(500).send('Error adding the module.');
         }
     }
 };
 
 // Get all modules
-export const getModules = async ( req, res ) => {
+export const getModules = async (req, res) => {
     try {
-        const modules = await Module.find()
+        const { id } = req.params; // Obtener el ID del curso de los parámetros de la URL
 
-        res.status( 200 ).json( modules );
-    } catch ( error ) {
-        console.error( error );
-        res.status( 500 ).send( 'Error retrieving modules.');
+        // Buscar el curso por ID y poblar los módulos
+        const course = await Course.findById(id).populate({
+            path: 'modulos',
+            match: { state: 'habilitado' } // Filtrar módulos con estado "habilitado"
+        });
+
+        if (!course) {
+            return res.status(404).send('Course not found');
+        }
+
+        // Filtrar los módulos habilitados
+        const enabledModules = course.modulos;
+
+        res.status(200).json({
+            msg: 'Modules retrieved successfully',
+            modules: enabledModules
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error retrieving modules.');
     }
 };
 
 // Update an existing module
-export const putModule = async ( req, res ) => {
+export const putModule = async (req, res) => {
     try {
-        const moduleId = req.params.id;
+        const { id, moduleId } = req.params;
         const { _id, archivos, ...moduleData } = req.body;
+        const userEmail = req.user.email; // Obteniendo el email del token
 
-        let module = await Module.findById( moduleId );
+        const course = await Course.findById(courseId);
 
-        if ( !module ) {
-            return res.status( 404 ).json( { msg: 'Module not found.' } );
+        if (!course) {
+            return res.status(404).send('Course not found');
         }
 
-        module.set( {
-            _id: moduleId,
-            ...moduleData
-        } );
+        if (course.userCreator !== userEmail) {
+            return res.status(403).send('Only the course creator can edit modules');
+        }
 
-        const updatedModule = await module.save();
+        let module = course.modulos.id(moduleId);
+        if (!module) {
+            return res.status(404).send('Module not found in this course');
+        }
 
-        res.json( {
+        Object.assign(module, moduleData);
+
+        await course.save();
+
+        res.json({
             message: 'Module updated',
-            updatedModule
-        } );
-    } catch ( error ) {
-        console.error( error );
-        if ( error.name === 'ValidationError' ) {
-            res.status( 500 ).json( {
+            updatedModule: module
+        });
+    } catch (error) {
+        console.error(error);
+        if (error.name === 'ValidationError') {
+            res.status(500).json({
                 msg: 'Error within module validation, check every field',
                 error: error.message
-            } );
+            });
         } else {
-            res.status( 500 ).json( {
+            res.status(500).json({
                 msg: 'Error updating the module.',
                 error: error.message
-            } );
+            });
         }
     }
 };
 
 // Delete a module by ID
-export const deleteModule = async ( req, res ) => {
+export const deleteModule = async (req, res) => {
     try {
-        const moduleId = req.params.id;
+        const { id, moduleId } = req.params;
+        const userEmail = req.user.email; // Obteniendo el email del token
 
-        const deletedModule = await Module.findByIdAndDelete( moduleId );
+        const course = await Course.findById(id);
 
-        if ( !deletedModule ) {
-            return res.status( 404 ).json( { msg: 'Module not found.' } );
+        if (!course) {
+            return res.status(404).send('Course not found');
         }
 
-        res.json( {
+        if (course.userCreator !== userEmail) {
+            return res.status(403).send('Only the course creator can delete modules');
+        }
+
+        let module = course.modulos.id(moduleId);
+        if (!module) {
+            return res.status(404).send('Module not found in this course');
+        }
+
+        module.remove();
+
+        await course.save();
+
+        res.json({
             message: 'Module deleted',
-            deletedModule
-        } );
-    } catch ( error ) {
-        console.error( error );
-        res.status( 500 ).json( {
+            deletedModule: module
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
             msg: 'Error deleting the module.',
             error: error.message
-        } );
+        });
     }
 };
 
-// Add URLs to an existing module without overwriting
-export const addUrlsToModule = async ( req, res ) => {
-    try {
-        const moduleId = req.params.id;
-        const { newUrls } = req.body; // Assume the new URLs are sent in an array called 'newUrls'
+// // Add URLs to an existing module without overwriting
+// export const addUrlsToModule = async ( req, res ) => {
+//     try {
+//         const moduleId = req.params.id;
+//         const { newUrls } = req.body; // Assume the new URLs are sent in an array called 'newUrls'
 
-        // Find the module by ID
-        let module = await Module.findById( moduleId );
+//         // Find the module by ID
+//         let module = await Module.findById( moduleId );
 
-        // Check if the module was found
-        if ( !module ) {
-            return res.status( 404 ).json( { msg: 'Module not found.' } );
-        }
+//         // Check if the module was found
+//         if ( !module ) {
+//             return res.status( 404 ).json( { msg: 'Module not found.' } );
+//         }
 
-        // Validate the new URLs
-        const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
-        const invalidUrls = newUrls.filter( url => !urlRegex.test( url ) );
+//         // Validate the new URLs
+//         const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
+//         const invalidUrls = newUrls.filter( url => !urlRegex.test( url ) );
 
-        if ( invalidUrls.length > 0 ) {
-            return res.status( 400 ).json( { msg: 'Invalid URL detected.', invalidUrls } );
-        }
+//         if ( invalidUrls.length > 0 ) {
+//             return res.status( 400 ).json( { msg: 'Invalid URL detected.', invalidUrls } );
+//         }
 
-        // Append the new URLs to the existing 'archivos' array
-        module.archivos.push( ...newUrls );
+//         // Append the new URLs to the existing 'archivos' array
+//         module.archivos.push( ...newUrls );
 
-        // Save the updated module
-        const updatedModule = await module.save();
+//         // Save the updated module
+//         const updatedModule = await module.save();
 
-        // Respond with the updated module
-        res.status( 201 ).json( {
-            message: 'URLs added to the module',
-            updatedModule
-        } );
-    } catch ( error ) {
-        console.error( error );
-        res.status( 500 ).json( {
-            msg: 'Error adding URLs to the module.',
-            error: error.message
-        } );
-    }
-}
+//         // Respond with the updated module
+//         res.status( 201 ).json( {
+//             message: 'URLs added to the module',
+//             updatedModule
+//         } );
+//     } catch ( error ) {
+//         console.error( error );
+//         res.status( 500 ).json( {
+//             msg: 'Error adding URLs to the module.',
+//             error: error.message
+//         } );
+//     }
+// }
 
 
 

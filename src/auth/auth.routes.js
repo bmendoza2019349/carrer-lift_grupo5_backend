@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { check } from "express-validator";
-import { register, login, assignCourse } from "../auth/auth.controller.js";
+import { register, login, assignCourse, getUserCourses } from "../auth/auth.controller.js";
 import { validateFields } from "../middlewares/validateFields.js";
 import { existEmail } from "../helpers/db-validators.js";
 import { validarJWT } from "../middlewares/validar-jwt.js";
@@ -42,5 +42,7 @@ router.post("/assign",
     ],
     assignCourse
 );
+
+router.get("/mycourses", validarJWT, getUserCourses);
 
 export default router;

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 import { validateFields } from '../middlewares/validateFields.js';
 import { validarJWT } from '../middlewares/validar-jwt.js';
-import { coursePost, coursePut, courseGet, courseDelete } from './course.controller.js'; 
+import { coursePost, coursePut, courseGet, courseDelete } from './course.controller.js';
 
 
 const router = Router();
@@ -17,6 +17,8 @@ router.post(
         validateFields,
         validarJWT,
     ], coursePost);
+
+
 
 router.put(
     "/:id",
