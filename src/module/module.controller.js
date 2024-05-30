@@ -30,10 +30,7 @@ export const postModule = async (req, res) => {
 
         await course.save();
 
-        res.status(200).json({
-            msg: 'Module added successfully',
-            course
-        });
+        res.status(200).send('Module added successfully');
     } catch (error) {
         console.error(error);
         if (error.name === 'ValidationError') {
@@ -98,10 +95,7 @@ export const putModule = async (req, res) => {
 
         await course.save();
 
-        res.json({
-            message: 'Module updated',
-            updatedModule: module
-        });
+        res.status(200).send(`Module added successfully ${course}`);
     } catch (error) {
         console.error(error);
         if (error.name === 'ValidationError') {

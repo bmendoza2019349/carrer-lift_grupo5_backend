@@ -7,7 +7,8 @@ export const updateUser = async (req, res) => {
       const { id } = req.params;
 
       // Verificar si el usuario está autenticado y si es el mismo que el usuario que se está intentando actualizar
-      if (!req.user || req.user.uid !== id) {
+      if (req.user.uid !== id) {
+        console.log(req.user.uid, id)
           return res.status(403).json({ msg: "You are not authorized to update this user" });
       }
 
@@ -19,10 +20,8 @@ export const updateUser = async (req, res) => {
       }
   
       await User.findByIdAndUpdate(id, rest);
-  
-      const user = await User.findOne({ _id: id });
 
-        res.status(200).send(`Your account has been update ${user}`);
+        res.status(200).send(`Your account has been update`);
 
     } catch (error) {
         console.error(error);

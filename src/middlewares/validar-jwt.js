@@ -11,10 +11,8 @@ export const validarJWT = (req, res, next) => {
         token = token.replace(/^Bearer\s+/, '');
         const decoded = jwt.verify(token, process.env.TOKEN_KEY);
 
-        req.user = {
-            email: decoded.email,
-            roleUser: decoded.roleUser // Asegúrate de que el token contenga el rol del usuario
-        };
+        req.user = decoded // Asegúrate de que el token contenga el rol del usuario
+
     } catch (e) {
         console.log(e);
         return res.status(401).send('Invalid Token');

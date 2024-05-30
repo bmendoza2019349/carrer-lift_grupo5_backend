@@ -6,7 +6,7 @@ import { validateFields } from "../middlewares/validateFields.js";
 const routerUser = Router();
 
 routerUser.put(
-    '/update/:id',
+    '/:id',
     [
         check("email", "This is not a valid email").isEmail(),
         check("username", "The username is required").not().isEmpty(),
