@@ -1,6 +1,6 @@
 import mongoose, {Schema} from "mongoose";
 
-const roles = ['admin', 'user', 'superAdmin'];
+const roles = ['teacher', 'student', 'superAdmin'];
 
 const UserSchema = mongoose.Schema({
     email: {

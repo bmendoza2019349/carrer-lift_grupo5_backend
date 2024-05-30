@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { dbConnection } from './mongo.js';
 import authRoutes from '../src/auth/auth.routes.js'
+import userRoutes from '../src/users/user.routes.js'
 import '../src/users/initUsers.js'
 
 class Server {
@@ -11,6 +12,7 @@ class Server {
         this.app = express();
         this.port = process.env.PORT;
         this.authPath = '/carrerLiftApi/v1/auth'
+        this.userPath = '/carrerLiftApi/v1/user'
 
         this.conectarDB(); 
         this.middlewares();
@@ -33,6 +35,7 @@ class Server {
    
     routes() {  
         this.app.use(this.authPath, authRoutes)
+        this.app.use(this.userPath, userRoutes)
     };
 
     listen() {
