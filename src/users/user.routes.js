@@ -28,5 +28,6 @@ routerUser.delete(
         validarCampos
     ],
     deleteUser
-)
+);
+
 export default routerUser;
