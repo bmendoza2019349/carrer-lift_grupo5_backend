@@ -48,7 +48,7 @@ export const login = async (req, res) => {
       return res.status(400).send("wrong password");
     }
 
-    const token = await generarJWT(user.id, user.email,user.username, user.roleUser);
+    const token = await generarJWT(user.id, user.email, user.roleUser,user.username);
 
     res.status(200).json({
       msg: "Login Ok!!!",
@@ -104,22 +104,25 @@ export const assignCourse = async (req, res) => {
 
 // Nuevo controlador para obtener los cursos asignados a un usuario
 export const getUserCourses = async (req, res) => {
-    try {
-        const userEmail = req.user.email; // Obteniendo el email del token
+  try {
+      const userEmail = req.user.email; // Obteniendo el email del token
 
-        // Buscar el usuario por email y poblar los cursos
-        const user = await Users.findOne({ email: userEmail }).populate('courses');
+      // Buscar el usuario por email y poblar los cursos con el estado activado
+      const user = await Users.findOne({ email: userEmail }).populate({
+          path: 'courses',
+          match: { status: 'activada' } // Filtrar cursos por estado activado
+      });
 
-        if (!user) {
-            return res.status(404).send('User not found');
-        }
+      if (!user) {
+          return res.status(404).send('User not found');
+      }
 
-        res.status(200).json({
-            msg: 'Courses retrieved successfully',
-            courses: user.courses
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error');
-    }
+      res.status(200).json({
+          msg: 'Courses retrieved successfully',
+          courses: user.courses
+      });
+  } catch (error) {
+      console.log(error);
+      res.status(500).send('Internal Server Error');
+  }
 };

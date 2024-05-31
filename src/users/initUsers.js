@@ -40,7 +40,7 @@ const defaultUsers = [
     },
     {
       email: "admin@gmail.com",
-      username: "admin",
+      username: "profesorrs",
       password: "123456",
       roleUser: "profesor",
       stateUser: true,

@@ -6,14 +6,11 @@ export const coursePost = async (req, res) => {
     try {
         const { nameCourse, descripcion, img } = req.body;
         const userCreator = req.user.email; // Obteniendo el email del token
-        const userRole = req.user.roleUser; // Obteniendo el rol del usuario del token
 
         // Verificar si el usuario tiene el rol de "profesor"
         
-        if (userRole !== 'profesor' ) {
+        if (req.user.roleUser !== 'profesor' ) {
             return res.status(403).send('Only professors can add courses');
-        }else if (userRole !== 'superAdmin'){
-            return res.status(403).send('Only superAdmin can add courses');
         }
 
         const course = new Course({ userCreator, nameCourse, descripcion, img });
@@ -120,6 +117,10 @@ export const getCourseById = async (req, res) => {
 
         if(!course){
             return res.status(404).send('Course not found');
+        }
+
+        if(course.status !== "activada"){
+            return res.status(404).send('Course state is desactived');
         }
 
         res.status(200).json({
