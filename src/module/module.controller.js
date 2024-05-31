@@ -1,5 +1,5 @@
 import { response, request } from "express";
-import Course from '../course/course.model.js';
+import {Course, Module} from '../course/course.model.js';
 
 // Add a new module
 export const postModule = async (req, res) => {
@@ -150,6 +150,26 @@ export const deleteModule = async (req, res) => {
     }
 };
 
+export const getModuleById = async (req, res) => {
+    try {
+        const {id} = req.params;
+
+        const module = await Module.findById(id);
+
+        if(!module){
+            return res.status(404).send('Module not found');
+        }
+
+        res.status(200).json({
+            module
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error module');
+    }
+};
+
 // // Add URLs to an existing module without overwriting
 // export const addUrlsToModule = async ( req, res ) => {
 //     try {
@@ -191,8 +211,3 @@ export const deleteModule = async (req, res) => {
 //         } );
 //     }
 // }
-
-
-
-
-
