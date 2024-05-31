@@ -45,3 +45,11 @@ export const deleteUser = async (req, res) => {
     res.status(500).send('Contact the administrator');
   }
 };
+
+export const getUserById = async (req, res) => {
+  try {
+    
+  } catch (error) {
+    
+  }
+}
