@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { check } from "express-validator";
-import { postModule, getModules, putModule, deleteModule,  } from "./module.controller.js";
+import { postModule, getModules, putModule, deleteModule, getModuleById } from "./module.controller.js";
 import { validateFields } from "../middlewares/validateFields.js";
 import { validarJWT } from "../middlewares/validar-jwt.js";
 
@@ -22,7 +22,10 @@ router.put('/:id', [
     check('nameModule').notEmpty().withMessage('A name for this module is required'),
     check('descriptionModule').notEmpty().withMessage('A description for this module is required'),
 ], putModule);
+
 router.delete('/:id', deleteModule);
+
+router.get('/courses/:id/modules/:moduleId', getModuleById);
 
 // router.patch('/:id', [
 //     validateFields,

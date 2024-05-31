@@ -1,5 +1,5 @@
 import { response, request } from "express";
-import {Course, Module} from '../course/course.model.js';
+import Course from '../course/course.model.js';
 
 // Add a new module
 export const postModule = async (req, res) => {
@@ -152,21 +152,29 @@ export const deleteModule = async (req, res) => {
 
 export const getModuleById = async (req, res) => {
     try {
-        const {id} = req.params;
+        const { id, moduleId } = req.params; // Obtener IDs del curso y módulo de los parámetros de la URL
 
-        const module = await Module.findById(id);
+        // Buscar el curso por ID
+        const course = await Course.findById(id);
 
-        if(!module){
-            return res.status(404).send('Module not found');
+        if (!course) {
+            return res.status(404).send('Course not found');
+        }
+
+        // Buscar el módulo dentro del curso
+        const module = course.modulos.id(moduleId);
+
+        if (!module) {
+            return res.status(404).send('Module not found in this course');
         }
 
         res.status(200).json({
+            msg: 'Module retrieved successfully',
             module
         });
-
     } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error module');
+        console.error(error);
+        res.status(500).send('Error retrieving the module.');
     }
 };
 
