@@ -8,7 +8,7 @@ import { coursePost, coursePut, courseGet, courseDelete, getCourseById } from '.
 const router = Router();
 
 router.get( "/", validarJWT, courseGet );
-router.get( "/:id", validarJWT, check( "id", "The course id is invalid" ).isMongoId(), validateFields, getCourseById );
+router.get( "/:id", check( "id", "The course id is invalid" ).isMongoId(), validateFields, getCourseById );
 
 router.post(
     "/",
