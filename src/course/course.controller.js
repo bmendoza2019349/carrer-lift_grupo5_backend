@@ -2,67 +2,67 @@ import { response, request } from "express";
 import Course from '../course/course.model.js';
 import Users from "../users/user.model.js";
 
-export const coursePost = async (req, res) => {
+export const coursePost = async ( req, res ) => {
     try {
         const { nameCourse, descripcion, img } = req.body;
         const userCreator = req.user.email; // Obteniendo el email del token
 
         // Verificar si el usuario tiene el rol de "profesor"
-        
-        if (req.user.roleUser !== 'profesor' ) {
-            return res.status(403).send('Only professors can add courses');
+
+        if ( req.user.roleUser !== 'profesor' ) {
+            return res.status( 403 ).send( 'Only professors can add courses' );
         }
 
-        const course = new Course({ userCreator, nameCourse, descripcion, img });
+        const course = new Course( { userCreator, nameCourse, descripcion, img } );
 
         await course.save();
 
-        res.status(200).send(`The course was added successfully ${course}`);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error course');
+        res.status( 200 ).send( `The course was added successfully ${course}` );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 };
 
-export const courseGet = async (req, res) => {
+export const courseGet = async ( req, res ) => {
     try {
         const userCreator = req.user.email;
 
-        const courses = await Course.find(userCreator);
+        const courses = await Course.find( { userCreator: userCreator } );
 
-        res.status(200).json({
+        res.status( 200 ).json( {
             courses
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error course');
+        } );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 };
 
 // Controlador para actualizar un curso
-export const coursePut = async (req, res) => {
+export const coursePut = async ( req, res ) => {
     try {
-        if (!req.user || !req.user.email) {
-            return res.status(401).json({ msg: "Unauthorized" });
+        if ( !req.user || !req.user.email ) {
+            return res.status( 401 ).json( { msg: "Unauthorized" } );
         }
 
         const { id } = req.params;
         const { email } = req.user;
 
-        const user = await Users.findOne({ email });
+        const user = await Users.findOne( { email } );
         const autorEmail = user.email;
 
-        const course = await Course.findOne({ _id: id, userCreator: autorEmail });
+        const course = await Course.findOne( { _id: id, userCreator: autorEmail } );
 
-        if (!course) {
-            return res.status(403).send('You are not authorized to update this course');
+        if ( !course ) {
+            return res.status( 403 ).send( 'You are not authorized to update this course' );
         }
 
         const { _id, ...rest } = req.body;
 
-        await Course.findByIdAndUpdate(id, rest);
+        await Course.findByIdAndUpdate( id, rest );
 
-        const updatedCourse = await Course.findById(id);
+        const updatedCourse = await Course.findById( id );
 
         // Actualizar el curso en los usuarios asignados
         await Users.updateMany(
@@ -71,26 +71,26 @@ export const coursePut = async (req, res) => {
             { arrayFilters: [{ "elem": id }] }
         );
 
-        res.status(200).send(`The course was successfully updated ${updatedCourse}`);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error course');
+        res.status( 200 ).send( `The course was successfully updated ${updatedCourse}` );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 };
 
 // Controlador para eliminar un curso
-export const courseDelete = async (req, res) => {
+export const courseDelete = async ( req, res ) => {
     try {
         const { id } = req.params;
         const userCreator = req.user.email;
 
-        const course = await Course.findById(id);
-        if (!course) {
-            return res.status(404).send('Course not found');
+        const course = await Course.findById( id );
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
         }
 
-        if (course.userCreator !== userCreator) {
-            return res.status(403).send('You are not authorized to delete this course');
+        if ( course.userCreator !== userCreator ) {
+            return res.status( 403 ).send( 'You are not authorized to delete this course' );
         }
 
         course.status = "desactivada";
@@ -102,32 +102,32 @@ export const courseDelete = async (req, res) => {
             { $pull: { courses: id } }
         );
 
-        res.status(200).send('The course was deleted correctly');
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error course');
+        res.status( 200 ).send( 'The course was deleted correctly' );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 };
 
-export const getCourseById = async (req, res) => {
+export const getCourseById = async ( req, res ) => {
     try {
-        const {id} = req.params;
+        const { id } = req.params;
 
-        const course = await Course.findById(id);
+        const course = await Course.findById( id );
 
-        if(!course){
-            return res.status(404).send('Course not found');
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
         }
 
-        if(course.status !== "activada"){
-            return res.status(404).send('Course state is desactived');
+        if ( course.status !== "activada" ) {
+            return res.status( 404 ).send( 'Course state is desactived' );
         }
 
-        res.status(200).json({
+        res.status( 200 ).json( {
             course
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal Server Error course');
+        } );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 }

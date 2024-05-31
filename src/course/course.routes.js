@@ -7,34 +7,34 @@ import { coursePost, coursePut, courseGet, courseDelete, getCourseById } from '.
 
 const router = Router();
 
-router.get("/", courseGet);
-router.get("/:id",check("id", "The course id is invalid").isMongoId(),validateFields, getCourseById);
+router.get( "/", validarJWT, courseGet );
+router.get( "/:id", validarJWT, check( "id", "The course id is invalid" ).isMongoId(), validateFields, getCourseById );
 
 router.post(
     "/",
     [
-        check("nameCourse", "The course name is required").not().isEmpty(),
-        check("descripcion", "The course description is required").not().isEmpty(),
+        check( "nameCourse", "The course name is required" ).not().isEmpty(),
+        check( "descripcion", "The course description is required" ).not().isEmpty(),
         validateFields,
         validarJWT,
-    ], coursePost);
+    ], coursePost );
 
 
 
 router.put(
     "/:id",
     [
-        check("id", "The course ID must be a valid MongoDB format").isMongoId(),
+        check( "id", "The course ID must be a valid MongoDB format" ).isMongoId(),
         validateFields,
         validarJWT,
-    ], coursePut);
+    ], coursePut );
 
 router.delete(
     "/:id",
     [
-        check("id", "The course ID must be a valid MongoDB format").isMongoId(),
+        check( "id", "The course ID must be a valid MongoDB format" ).isMongoId(),
         validateFields,
         validarJWT,
-    ], courseDelete);
+    ], courseDelete );
 
 export default router;
