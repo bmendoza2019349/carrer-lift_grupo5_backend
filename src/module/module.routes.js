@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { check } from "express-validator";
-import { postModule, getModules, putModule, deleteModule, getModuleById, addUrlsToModule } from "./module.controller.js";
+import { postModule, getModules, putModule, deleteModule, getModuleById, addUrlsToModule, editUrlModule } from "./module.controller.js";
 import { validateFields } from "../middlewares/validateFields.js";
 import { validarJWT } from "../middlewares/validar-jwt.js";
 
@@ -34,5 +34,17 @@ router.patch( '/editContent/:id/:moduleId', [
     // check an array of urls called archivos
     check( 'archivos' ).isURL().withMessage( 'Invalid URL' ),
 ], addUrlsToModule );
+
+router.patch(
+    '/editUrl/:id/:moduleId',
+    [
+        validarJWT,
+        validateFields,
+        check( 'url' ).isURL().withMessage( 'Invalid URL' ),
+        check( 'index' ).isNumeric().withMessage( 'Invalid index' ),
+    ],
+    editUrlModule
+);
+
 
 export default router;

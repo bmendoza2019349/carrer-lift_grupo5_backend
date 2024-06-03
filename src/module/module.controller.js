@@ -225,3 +225,55 @@ export const addUrlsToModule = async ( req, res ) => {
         }
     }
 }
+
+// Edit module url on specific index
+export const editUrlModule = async ( req, res ) => {
+    try {
+        const { id, moduleId } = req.params;
+        const { url, index } = req.body;
+        const userEmail = req.user.email; // Obteniendo el email del token
+
+        const course = await Course.findById( id );
+
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
+        }
+
+        if ( course.userCreator !== userEmail ) {
+            return res.status( 403 ).send( 'Only the course creator can edit modules' );
+        }
+
+        let module = course.modulos.id( moduleId );
+        if ( !module ) {
+            return res.status( 404 ).send( 'Module not found in this course' );
+        }
+
+        if ( index < 0 || index >= module.archivos.length ) {
+            return res.status( 400 ).send( 'Invalid index' );
+        }
+
+        //edit the url if, by editing it, the new url is not a duplicate of an existent url
+        if ( module.archivos.indexOf( url ) !== -1 ) {
+            return res.status( 400 ).send( 'The new URL is already in the module' );
+        }
+
+        module.archivos[index] = url;
+
+        await course.save();
+
+        res.status( 200 ).send( `URL edited successfully in module: ${module.nameModule}` );
+    } catch ( error ) {
+        console.error( error );
+        if ( error.name === 'ValidationError' ) {
+            res.status( 500 ).json( {
+                msg: 'Error within module validation, check every field',
+                error: error.message
+            } );
+        } else {
+            res.status( 500 ).json( {
+                msg: 'Error updating the module.',
+                error: error.message
+            } );
+        }
+    }
+}
