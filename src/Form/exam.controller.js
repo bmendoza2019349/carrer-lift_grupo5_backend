@@ -7,10 +7,11 @@ export const createExam = async ( req, res ) => {
     try {
         const { id } = req.params
         const { title, questions, totalPoints } = req.body;
-        const userId = req.user.id;
-        console.log( userId )
+        const userEmail = req.user.email;
+        console.log( userEmail )
 
-        const user = await User.findById( userId );
+        const user = await User.findOne( { email: userEmail } );
+        console.log( user.roleUser )
         if ( user.roleUser !== 'profesor' ) {
             return res.status( 403 ).send( "Only professors can create exams" );
         }
@@ -23,7 +24,7 @@ export const createExam = async ( req, res ) => {
                 points: q.points
             } ) ),
             totalPoints,
-            createdBy: userId,
+            createBy: userEmail,
         } );
 
         await exam.save();
