@@ -7,6 +7,8 @@ import authRoutes from '../src/auth/auth.routes.js'
 import '../src/users/initUsers.js'
 import moduleRoutes from '../src/module/module.routes.js'
 import courseRoutes from '../src/course/course.routes.js'
+import formRoutes from '../src/Form/exam.routes.js'
+import userRoutes from '../src/users/user.routes.js'
 
 class Server {
     constructor() {
@@ -15,35 +17,39 @@ class Server {
         this.authPath = '/carrerLiftApi/v1/auth'
         this.modulePath = '/carrerLiftApi/v1/modules'
         this.coursePath = '/carrerLiftApi/v1/course'
-        this.conectarDB();
+        this.formPath = '/carrerLiftApi/v1/form'
+        this.userPath = '/carrerLiftApi/v1/user'
+        this.conectarDB(); 
         this.middlewares();
         this.routes();
     }
 
-    async conectarDB () {
+    async conectarDB() {
         await dbConnection();
     }
 
-
-    middlewares () {
-        this.app.use( express.urlencoded( { extended: false } ) );
-        this.app.use( cors() );
-        this.app.use( express.json() );
-        this.app.use( helmet() );
-        this.app.use( morgan( 'dev' ) );
+    
+    middlewares() {
+        this.app.use(express.urlencoded({ extended: false }));
+        this.app.use(cors());
+        this.app.use(express.json());
+        this.app.use(helmet());
+        this.app.use(morgan('dev'));
     };
 
-
-    routes () {
-        this.app.use( this.authPath, authRoutes );
+   
+    routes() {  
+        this.app.use(this.authPath, authRoutes);
         this.app.use( this.modulePath, moduleRoutes );
-        this.app.use( this.coursePath, courseRoutes );
+        this.app.use(this.coursePath, courseRoutes);
+        this.app.use(this.formPath, formRoutes);
+        this.app.use(this.userPath, userRoutes);
     };
 
-    listen () {
-        this.app.listen( this.port, () => {
-            console.log( 'Server running on port ', this.port );
-        } );
+    listen() {
+        this.app.listen(this.port, () => {
+            console.log('Server running on port ', this.port);
+        });
     }
 }
 

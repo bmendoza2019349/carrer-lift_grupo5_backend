@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { check } from "express-validator";
-import { register, login } from "../auth/auth.controller.js";
+import { register, login, assignCourse, getUserCourses } from "../auth/auth.controller.js";
 import { validateFields } from "../middlewares/validateFields.js";
 import { existEmail } from "../helpers/db-validators.js";
+import { validarJWT } from "../middlewares/validar-jwt.js";
 
 const router = Router();
 
@@ -32,5 +33,16 @@ router.post(
   ],
   login
 );
+
+router.post("/assign",
+    [
+        check("codigo", "Course code is required").not().isEmpty(),
+        validateFields,
+        validarJWT
+    ],
+    assignCourse
+);
+
+router.get("/mycourses", validarJWT, getUserCourses);
 
 export default router;

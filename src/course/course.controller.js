@@ -1,77 +1,133 @@
+import { response, request } from "express";
 import Course from '../course/course.model.js';
-import { response } from 'express';
+import Users from "../users/user.model.js";
 
-export const coursePost = async (req, res) => {
+export const coursePost = async ( req, res ) => {
     try {
-        const { userCreator, nameCourse, descripcion, img } = req.body;
-        const course = new Course({ userCreator, nameCourse, descripcion, img });
-        
+        const { nameCourse, descripcion, img } = req.body;
+        const userCreator = req.user.email; // Obteniendo el email del token
+
+        // Verificar si el usuario tiene el rol de "profesor"
+
+        if ( req.user.roleUser !== 'profesor' ) {
+            return res.status( 403 ).send( 'Only professors can add courses' );
+        }
+
+        const course = new Course( { userCreator, nameCourse, descripcion, img } );
+
         await course.save();
 
-        res.status(200).json({
-            msg: 'The course was added successfully',
-            course
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ msg: 'Internal Server Error' });
+        res.status( 200 ).send( `The course was added successfully ${course}` );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 };
 
-export const courseGet = async (req, res) => {
+export const courseGet = async ( req, res ) => {
     try {
-        const courses = await Course.find({ status: true }); 
-        res.status(200).json({
+        const userCreator = req.user.email;
+
+        const courses = await Course.find( { userCreator: userCreator } );
+
+        res.status( 200 ).json( {
             courses
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ msg: 'Internal Server Error' });
+        } );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 };
 
-export const coursePut = async (req, res) => {
+// Controlador para actualizar un curso
+export const coursePut = async ( req, res ) => {
     try {
-        const { id } = req.params;
-        const { userCreator, nameCourse, descripcion, img } = req.body;
-
-        const existingCourse = await Course.findById(id);
-        if (!existingCourse) {
-            return res.status(404).json({ msg: 'Course not found' });
+        if ( !req.user || !req.user.email ) {
+            return res.status( 401 ).json( { msg: "Unauthorized" } );
         }
 
-        existingCourse.userCreator = userCreator;
-        existingCourse.nameCourse = nameCourse;
-        existingCourse.descripcion = descripcion;
-        existingCourse.img = img;
+        const { id } = req.params;
+        const { email } = req.user;
 
-        await existingCourse.save();
+        const user = await Users.findOne( { email } );
+        const autorEmail = user.email;
 
-        res.status(200).json({
-            msg: 'The course was successfully updated',
-            course: existingCourse
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ msg: 'Internal Server Error' });
+        const course = await Course.findOne( { _id: id, userCreator: autorEmail } );
+
+        if ( !course ) {
+            return res.status( 403 ).send( 'You are not authorized to update this course' );
+        }
+
+        const { _id, ...rest } = req.body;
+
+        await Course.findByIdAndUpdate( id, rest );
+
+        const updatedCourse = await Course.findById( id );
+
+        // Actualizar el curso en los usuarios asignados
+        await Users.updateMany(
+            { courses: id },
+            { $set: { "courses.$[elem]": updatedCourse } },
+            { arrayFilters: [{ "elem": id }] }
+        );
+
+        res.status( 200 ).send( `The course was successfully updated ${updatedCourse}` );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 };
 
-export const courseDelete = async (req, res) => {
+// Controlador para eliminar un curso
+export const courseDelete = async ( req, res ) => {
     try {
         const { id } = req.params;
+        const userCreator = req.user.email;
 
-        const course = await Course.findById(id);
-        if (!course) {
-            return res.status(404).json({ msg: 'Course not found' });
+        const course = await Course.findById( id );
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
         }
 
-        course.status = false;
+        if ( course.userCreator !== userCreator ) {
+            return res.status( 403 ).send( 'You are not authorized to delete this course' );
+        }
+
+        course.status = "desactivada";
         await course.save();
 
-        res.status(200).json({ msg: 'The course was deleted correctly', deletedCourse: course });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ msg: 'Internal Server Error' });
+        // Eliminar el curso de los usuarios asignados
+        await Users.updateMany(
+            { courses: id },
+            { $pull: { courses: id } }
+        );
+
+        res.status( 200 ).send( 'The course was deleted correctly' );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
     }
 };
+
+export const getCourseById = async ( req, res ) => {
+    try {
+        const { id } = req.params;
+
+        const course = await Course.findById( id );
+
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
+        }
+
+        if ( course.status !== "activada" ) {
+            return res.status( 404 ).send( 'Course state is desactived' );
+        }
+
+        res.status( 200 ).json( {
+            course
+        } );
+    } catch ( error ) {
+        console.log( error );
+        res.status( 500 ).send( 'Internal Server Error course' );
+    }
+}

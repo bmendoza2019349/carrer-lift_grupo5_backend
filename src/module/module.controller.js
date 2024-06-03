@@ -1,33 +1,42 @@
 import { response, request } from "express";
-import Module from './module.model.js';
+import Course from '../course/course.model.js';
+
 // Add a new module
 export const postModule = async ( req, res ) => {
     try {
-        const { _id, ...moduleData } = req.body;
+        const { id } = req.params;
+        const { nameModule, archivos, descriptionModule, exams, state } = req.body;
+        const userEmail = req.user.email; // Obteniendo el email del token
 
-        const newModule = new Module( {
-            _id,
-            ...moduleData
-        } );
+        const course = await Course.findById( id );
 
-        const savedModule = await newModule.save();
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
+        }
 
-        res.status( 201 ).json( {
-            message: 'Module Created',
-            savedModule
-        } );
+        if ( course.userCreator !== userEmail ) {
+            return res.status( 403 ).send( 'Only the course creator can add modules' );
+        }
+
+        const newModule = {
+            nameModule,
+            archivos,
+            descriptionModule,
+            exams,
+            state
+        };
+
+        course.modulos.push( newModule );
+
+        await course.save();
+
+        res.status( 200 ).send( 'Module added successfully' );
     } catch ( error ) {
         console.error( error );
         if ( error.name === 'ValidationError' ) {
-            res.status( 500 ).json( {
-                msg: 'Error within module validation, check every field',
-                error: error.message
-            } );
+            res.status( 500 ).send( 'Error within module validation, check every field' );
         } else {
-            res.status( 500 ).json( {
-                msg: 'Error adding the module.',
-                error: error.message
-            } );
+            res.status( 500 ).send( 'Error adding the module.' );
         }
     }
 };
@@ -35,50 +44,64 @@ export const postModule = async ( req, res ) => {
 // Get all modules
 export const getModules = async ( req, res ) => {
     try {
-        const modules = await Module.find()
+        const { id } = req.params; // Obtener el ID del curso de los parámetros de la URL
 
-        res.status( 200 ).json( modules );
+        // Buscar el curso por ID y poblar los módulos
+        const course = await Course.findById( id ).populate( {
+            path: 'modulos',
+            match: { state: 'habilitado' } // Filtrar módulos con estado "habilitado"
+        } );
+
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
+        }
+
+        // Filtrar los módulos habilitados
+        const enabledModules = course.modulos;
+
+        res.status( 200 ).json( {
+            msg: 'Modules retrieved successfully',
+            modules: enabledModules
+        } );
     } catch ( error ) {
         console.error( error );
-        res.status( 500 ).json( {
-            msg: 'Error retrieving modules.',
-            error: error.message
-        } );
+        res.status( 500 ).send( 'Error retrieving modules.' );
     }
 };
 
 // Update an existing module
 export const putModule = async ( req, res ) => {
     try {
-        const moduleId = req.params.id;
+        const { id, moduleId } = req.params;
         const { _id, archivos, ...moduleData } = req.body;
+        const userEmail = req.user.email; // Obteniendo el email del token
 
-        let module = await Module.findById( moduleId );
+        const course = await Course.findById( id );
 
-        if ( !module ) {
-            return res.status( 404 ).json( { msg: 'Module not found.' } );
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
         }
 
-        module.set( {
-            _id: moduleId,
-            ...moduleData
-        } );
+        if ( course.userCreator !== userEmail ) {
+            return res.status( 403 ).send( 'Only the course creator can edit modules' );
+        }
 
-        const updatedModule = await module.save();
+        let module = course.modulos.id( moduleId );
+        if ( !module ) {
+            return res.status( 404 ).send( 'Module not found in this course' );
+        }
 
-        res.json( {
-            message: 'Module updated',
-            updatedModule
-        } );
+        Object.assign( module, moduleData );
+
+        await course.save();
+
+        res.status( 200 ).send( `Module added successfully ${course}` );
     } catch ( error ) {
         console.error( error );
         if ( error.name === 'ValidationError' ) {
             res.status( 500 ).json( {
-                // Display the error message and a text with the parameters that trigger such error
                 msg: 'Error within module validation, check every field',
-                error: error.message,
-                // Display the parameters that trigger the error
-                parameters: error.errors
+                error: error.message
             } );
         } else {
             res.status( 500 ).json( {
@@ -92,17 +115,31 @@ export const putModule = async ( req, res ) => {
 // Delete a module by ID
 export const deleteModule = async ( req, res ) => {
     try {
-        const moduleId = req.params.id;
+        const { id, moduleId } = req.params;
+        const userEmail = req.user.email; // Obteniendo el email del token
 
-        const deletedModule = await Module.findByIdAndDelete( moduleId );
+        const course = await Course.findById( id );
 
-        if ( !deletedModule ) {
-            return res.status( 404 ).json( { msg: `Module with the ID ${moduleId} could not be found.` } );
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
         }
+
+        if ( course.userCreator !== userEmail ) {
+            return res.status( 403 ).send( 'Only the course creator can delete modules' );
+        }
+
+        let module = course.modulos.id( moduleId );
+        if ( !module ) {
+            return res.status( 404 ).send( 'Module not found in this course' );
+        }
+
+        module.deleteOne()
+
+        await course.save();
 
         res.json( {
             message: 'Module deleted',
-            deletedModule
+            deletedModule: module
         } );
     } catch ( error ) {
         console.error( error );
@@ -113,85 +150,78 @@ export const deleteModule = async ( req, res ) => {
     }
 };
 
+export const getModuleById = async ( req, res ) => {
+    try {
+        const { id, moduleId } = req.params; // Obtener IDs del curso y módulo de los parámetros de la URL
+
+        // Buscar el curso por ID
+        const course = await Course.findById( id );
+
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
+        }
+
+        // Buscar el módulo dentro del curso
+        const module = course.modulos.id( moduleId );
+
+        if ( !module ) {
+            return res.status( 404 ).send( 'Module not found in this course' );
+        }
+
+        res.status( 200 ).json( {
+            msg: 'Module retrieved successfully',
+            module
+        } );
+    } catch ( error ) {
+        console.error( error );
+        res.status( 500 ).send( 'Error retrieving the module.' );
+    }
+};
+
 // Add URLs to an existing module without overwriting
 export const addUrlsToModule = async ( req, res ) => {
     try {
-        const moduleId = req.params.id;
-        const { newUrls } = req.body; // Assume the new URLs are sent in an array called 'newUrls'
+        const { id, moduleId } = req.params;
+        const { archivos } = req.body; // Assume archivos is an array of URLs
+        const userEmail = req.user.email; // Obteniendo el email del token
 
-        // Find the module by ID
-        let module = await Module.findById( moduleId );
+        const course = await Course.findById( id );
 
-        // Check if the module was found
+        if ( !course ) {
+            return res.status( 404 ).send( 'Course not found' );
+        }
+
+        if ( course.userCreator !== userEmail ) {
+            return res.status( 403 ).send( 'Only the course creator can edit modules' );
+        }
+
+        let module = course.modulos.id( moduleId );
         if ( !module ) {
-            return res.status( 404 ).json( { msg: 'Module not found.' } );
+            return res.status( 404 ).send( 'Module not found in this course' );
         }
 
-        // Validate the new URLs
-        const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
-        const invalidUrls = newUrls.filter( url => !urlRegex.test( url ) );
-
-        if ( invalidUrls.length > 0 ) {
-            return res.status( 400 ).json( { msg: 'Invalid URL detected.', invalidUrls } );
+        if ( !Array.isArray( archivos ) ) {
+            return res.status( 400 ).send( 'Invalid format for archivos' );
         }
 
-        // Append the new URLs to the existing 'archivos' array
-        module.archivos.push( ...newUrls );
+        // Add new URLs without overwriting existing ones
+        module.archivos = module.archivos.concat( archivos.filter( url => module.archivos.indexOf( url ) === -1 ) );
 
-        // Save the updated module
-        const updatedModule = await module.save();
+        await course.save();
 
-        // Respond with the updated module
-        res.status( 201 ).json( {
-            message: 'URLs added to the module',
-            updatedModule
-        } );
+        res.status( 200 ).send( `URLs added successfully to module: ${module.nameModule}` );
     } catch ( error ) {
         console.error( error );
-        res.status( 500 ).json( {
-            msg: 'Error adding URLs to the module.',
-            error: error.message
-        } );
+        if ( error.name === 'ValidationError' ) {
+            res.status( 500 ).json( {
+                msg: 'Error within module validation, check every field',
+                error: error.message
+            } );
+        } else {
+            res.status( 500 ).json( {
+                msg: 'Error updating the module.',
+                error: error.message
+            } );
+        }
     }
 }
-
-export const updateSpecificIndex = async ( req, res ) => {
-    try {
-        const moduleId = req.params.id;
-        const { index, newUrl } = req.body;
-        let module = await Module.findById( moduleId );
-
-        if ( !module ) {
-            return res.status( 404 ).json( { msg: 'Module not found.' } );
-        }
-
-        // Validate the new URL
-        const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
-        if ( !urlRegex.test( newUrl ) ) {
-            return res.status( 400 ).json( { msg: `Invalid URL detected: ${newUrl}` } );
-        }
-
-        // Update the URL at the specified index
-        module.archivos[index] = newUrl;
-
-        // Save the updated module
-        const updatedModule = await module.save();
-
-        // Respond with the updated module
-        res.status( 201 ).json( {
-            message: 'URL updated in the module',
-            updatedModule
-        } );
-    } catch ( error ) {
-        console.error( error );
-        res.status( 500 ).json( {
-            msg: 'Error updating the URL in the module.',
-            error: error.message
-        } );
-    }
-}
-
-
-
-
-
