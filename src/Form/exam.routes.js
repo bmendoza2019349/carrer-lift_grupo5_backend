@@ -7,13 +7,12 @@ import { createExam, submitResponse, getStudentResponses } from "./exam.controll
 const router = Router();
 
 router.post(
-    '/createexam',
-    [ 
-        validarJWT, 
+    '/createExam/:id',
+    [
         validateFields,
-
-    ], createExam);
-router.post('/submitexam', validarJWT, validateFields, submitResponse);
-router.get('/responsexam', validarJWT, validateFields, getStudentResponses);
+        validarJWT
+    ], createExam );
+router.post( '/submitexam', validarJWT, validateFields, submitResponse );
+router.get( '/responsexam', validarJWT, validateFields, getStudentResponses );
 
 export default router;
