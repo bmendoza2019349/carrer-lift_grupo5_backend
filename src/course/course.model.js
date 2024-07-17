@@ -81,6 +81,6 @@ CourseSchema.pre( 'save', function ( next ) {
     next();
 } );
 
-CourseSchema.index( { "modulos.nameModule": 1 }, { unique: true, sparse: true } );
+CourseSchema.index({ "modulos.nameModule": 1 }, { unique: false, sparse: true });
 
 export default mongoose.model( 'Course', CourseSchema );
