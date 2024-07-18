@@ -1,5 +1,5 @@
 import bcryptjs from 'bcryptjs';
-import Users from '../users/user.model.js';
+import User from '../users/user.model.js';
 import Course from '../course/course.model.js';
 import { generarJWT } from '../helpers/generate-JWT.js';
 
