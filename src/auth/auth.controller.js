@@ -8,7 +8,7 @@ export const register = async ( req, res ) => {
     const { email, username, password, roleUser } = req.body;
     const encryptedPassword = bcryptjs.hashSync( password );
 
-    const user = await Users.create( {
+    const user = await User.create( {
       username,
       email: email.toLowerCase(),
       password: encryptedPassword,
@@ -38,13 +38,13 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if(user && (await bcryptjs.compare(password, user.password))){
-      const token = await generarJWT(user.id, user.email, user.role)
+      const token = await generarJWT(user.id, user.email, user.roleUser)
 
       res.status(200).json({
         msg: "Login Ok!!!",
         userDetails: {
           username: user.username,
-          role: user.role,
+          role: user.roleUser,
           token: token
         },
       });
