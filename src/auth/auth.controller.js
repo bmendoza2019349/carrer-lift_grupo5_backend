@@ -30,36 +30,40 @@ export const register = async ( req, res ) => {
   }
 };
 
-export const login = async ( req, res ) => {
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
+    //verificar si el email existe:
+    const user = await User.findOne({ email });
 
-    const user = await Users.findOne( { email: email.toLowerCase() } );
+    if(user && (await bcryptjs.compare(password, user.password))){
+      const token = await generarJWT(user.id, user.email, user.role)
 
-    if ( !user ) {
+      res.status(200).json({
+        msg: "Login Ok!!!",
+        userDetails: {
+          username: user.username,
+          role: user.role,
+          token: token
+        },
+      });
+    }
+
+    if (!user) {
       return res
-        .status( 400 )
-        .send( `Wrong credentials, ${email} doesn't exists en database` );
+        .status(400)
+        .send(`Wrong credentials, ${email} doesn't exists en database`);
     }
 
-    const validPassword = bcryptjs.compareSync( password, user.password );
-
-    if ( !validPassword ) {
-      return res.status( 400 ).send( "wrong password" );
+    // verificar la contraseña
+    const validPassword = bcryptjs.compareSync(password, user.password);
+    if (!validPassword) {
+      return res.status(400).send("wrong password");
     }
-
-    const token = await generarJWT( user.id, user.email, user.roleUser, user.username );
-
-    res.status( 200 ).json( {
-      msg: "Login Ok!!!",
-      userDetails: {
-        username: user.username,
-        roleUser: user.roleUser,
-        token: token,
-      },
-    } );
-  } catch ( e ) {
-    res.status( 500 ).send( "Comuniquese con el administrador" );
+   
+  } catch (e) {
+    res.status(500).send("Comuniquese con el administrador");
   }
 };
 
