@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 import { validateFields } from '../middlewares/validateFields.js';
 import { validarJWT } from '../middlewares/validar-jwt.js';
-import { coursePost, coursePut, courseGet, courseDelete, getCourseById, deleteVideo, getVideos, uploadVideo } from './course.controller.js';
+import { coursePost, coursePut, courseGet, courseDelete, getCourseById, deleteVideo, getVideos, uploadVideo, courseGetAlumno } from './course.controller.js';
 import upload from './upload.js';
 
 
@@ -56,5 +56,7 @@ router.delete(
     validarJWT,
     deleteVideo
 );
+
+router.get("/alumno", courseGetAlumno, validarJWT);
 
 export default router;

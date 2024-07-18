@@ -207,3 +207,28 @@ export const deleteVideo = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
+export const courseGetAlumno = async (req, res) => {
+    try {
+        const user = req.user; // Obtener el usuario desde el token
+        if (!user || user.roleUser !== 'alumno') {
+            return res.status(403).send('Only students can access their assigned courses');
+        }
+
+        // Obtener el usuario con los cursos poblados
+        const userWithCourses = await Users.findOne({ email: user.email }).populate('courses');
+
+        if (!userWithCourses) {
+            return res.status(404).send('User not found');
+        }
+
+        const courses = userWithCourses.courses;
+
+        res.status(200).json({
+            courses
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error course');
+    }
+};
