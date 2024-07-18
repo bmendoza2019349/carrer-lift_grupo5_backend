@@ -2,39 +2,59 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 import { validateFields } from '../middlewares/validateFields.js';
 import { validarJWT } from '../middlewares/validar-jwt.js';
-import { coursePost, coursePut, courseGet, courseDelete, getCourseById } from './course.controller.js';
+import { coursePost, coursePut, courseGet, courseDelete, getCourseById, deleteVideo, getVideos, uploadVideo } from './course.controller.js';
+import upload from './upload.js';
 
 
 const router = Router();
 
-router.get( "/", validarJWT, courseGet );
-router.get( "/:id", check( "id", "The course id is invalid" ).isMongoId(), validateFields, getCourseById );
+router.get("/", validarJWT, courseGet);
+router.get("/:id", check("id", "The course id is invalid").isMongoId(), validateFields, getCourseById);
 
 router.post(
     "/",
     [
-        check( "nameCourse", "The course name is required" ).not().isEmpty(),
-        check( "descripcion", "The course description is required" ).not().isEmpty(),
+        check("nameCourse", "The course name is required").not().isEmpty(),
+        check("descripcion", "The course description is required").not().isEmpty(),
         validateFields,
         validarJWT,
-    ], coursePost );
+    ], coursePost);
 
 
 
 router.put(
     "/:id",
     [
-        check( "id", "The course ID must be a valid MongoDB format" ).isMongoId(),
+        check("id", "The course ID must be a valid MongoDB format").isMongoId(),
         validateFields,
         validarJWT,
-    ], coursePut );
+    ], coursePut);
 
 router.delete(
     "/:id",
     [
-        check( "id", "The course ID must be a valid MongoDB format" ).isMongoId(),
+        check("id", "The course ID must be a valid MongoDB format").isMongoId(),
         validateFields,
         validarJWT,
-    ], courseDelete );
+    ], courseDelete);
+
+router.post(
+    "/:id/modules/:moduleId",
+    validarJWT,
+    upload.array('videos', 1), // Hasta 10 videos
+    uploadVideo
+);
+
+router.get(
+    "/:id/modules/:moduleId/videos",
+    validarJWT,
+    getVideos
+);
+
+router.delete(
+    "/:id/modules/:moduleId/videos/:videoName",
+    validarJWT,
+    deleteVideo
+);
 
 export default router;

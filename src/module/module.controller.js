@@ -73,7 +73,7 @@ export const getModules = async ( req, res ) => {
 export const putModule = async ( req, res ) => {
     try {
         const { id, moduleId } = req.params;
-        const { _id, archivos, ...moduleData } = req.body;
+        const { _id, videos, ...moduleData } = req.body;
         const userEmail = req.user.email; // Obteniendo el email del token
 
         const course = await Course.findById( id );
