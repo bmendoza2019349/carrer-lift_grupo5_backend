@@ -70,13 +70,13 @@ export const assignCourse = async ( req, res ) => {
     }
 
     // Buscar el curso por código
-    const course = await Course.findOne( { _id: codigo } );
+    const course = await Course.findOne( { codigo: codigo } );
     if ( !course ) {
       return res.status( 404 ).send( 'Course not found' );
     }
 
     // Buscar el usuario por email
-    const user = await Users.findOne( { email: userEmail } );
+    const user = await User.findOne( { email: userEmail } );
     if ( !user ) {
       return res.status( 404 ).send( 'User not found' );
     }
