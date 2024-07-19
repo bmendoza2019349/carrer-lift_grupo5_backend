@@ -99,10 +99,9 @@ export const assignCourse = async ( req, res ) => {
 // Nuevo controlador para obtener los cursos asignados a un usuario
 export const getUserCourses = async ( req, res ) => {
   try {
-    const userEmail = req.user.email; // Obteniendo el email del token
 
     // Buscar el usuario por email y poblar los cursos con el estado activado
-    const user = await Users.findOne( { email: userEmail } ).populate( {
+    const user = await User.findById( req.user.uid ).populate( {
       path: 'courses',
       match: { status: 'activada' } // Filtrar cursos por estado activado
     } );
