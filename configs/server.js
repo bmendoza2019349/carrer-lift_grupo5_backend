@@ -10,6 +10,7 @@ import courseRoutes from '../src/course/course.routes.js'
 import formRoutes from '../src/Form/exam.routes.js'
 import userRoutes from '../src/users/user.routes.js'
 import apiLimiter from '../src/middlewares/validar-cant-peticiones.js';
+import bodyParser from 'body-parser';
 
 class Server {
     constructor() {
@@ -36,8 +37,11 @@ class Server {
         this.app.use( express.json() );
         this.app.use( helmet() );
         this.app.use( morgan( 'dev' ) );
+        this.app.use( bodyParser.json( { limit: '100mb' } ) )
+        this.app.use( bodyParser.urlencoded( { limit: '100mb', extended: true } ) );
         //apiLimiter
         this.app.use( apiLimiter );
+        this.app.use( '/uploads', express.static( 'uploads' ) )
 
     };
 

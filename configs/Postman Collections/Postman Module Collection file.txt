@@ -1,0 +1,49 @@
+Post modules
+url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/
+
+{
+    "nameModule": "A3: Example Module",
+    "archivos": ["https://www.example.com", "https://youtu.be/dQw4w9WgXcQ?si=HItIiLQemH5WbRJW"],
+    "descriptionModule": "Just an example on how modules would look like"
+}
+
+///////////////////////////////////////////////////
+
+Get Modules
+url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/
+
+//////////////////////////////////////////////////
+
+newUrls (Patch)
+url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/(id del modulo)
+
+
+{
+    "newUrls": ["https://www.github.com"] (las url van en comillas, separadas por comas dentro del array)
+}
+
+/////////////////////////////////////////////////
+
+Edit Modules (put)
+
+url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/(id del modulo)
+
+{
+    "nameModule": "Introductory Course: Python Programming Language",
+    "descriptionModule": "What is Python and its applications in the daily life of a software developer"
+}
+
+///////////////////////////////////////////////
+
+Delete Module 
+url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/(id del modulo)
+
+//////////////////////////////////////////////
+
+Edit new index (patch)
+url: http://127.0.0.1:8080/carrerLiftApi/v1/modules/newIndex/(id del modulo)
+
+{
+    "index": 0, (debe ser numerico, sin comillas)
+    "newUrl": "https://github.com"
+}
