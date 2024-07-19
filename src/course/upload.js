@@ -1,4 +1,4 @@
-/*import multer from 'multer';
+import multer from 'multer';
 import path from 'path';
 import fs from 'node:fs'
 
@@ -35,4 +35,4 @@ const upload = multer( {
     limits: { fileSize: 100 * 1024 * 1024 }
 } );
 
-export default upload;*/
+export default upload;
