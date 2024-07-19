@@ -41,7 +41,7 @@ router.patch(
 );
 
 router.patch(
-    '/:courseId/module/:moduleId/urls',
+    '/:id/module/:moduleId/urls',
     [
         validarJWT,
         validateFields,
