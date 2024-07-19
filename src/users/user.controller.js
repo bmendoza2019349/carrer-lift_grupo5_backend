@@ -2,7 +2,6 @@ import User from "./user.model.js";
 import bcryptjs from 'bcryptjs';
 
 export const updateUser = async (req, res) => {
-
     try {
       const { id } = req.params;
 
