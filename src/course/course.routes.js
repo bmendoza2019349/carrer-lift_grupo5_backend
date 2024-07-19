@@ -38,12 +38,12 @@ router.delete(
         validarJWT,
     ], courseDelete );
 
-/*router.post(
+router.post(
     "/:id/modules/:moduleId",
     validarJWT,
     upload.array( 'videos', 10 ),
     uploadVideo
-);*/
+);
 
 router.get(
     "/:id/modules/:moduleId/videos",
