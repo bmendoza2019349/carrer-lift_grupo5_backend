@@ -200,10 +200,6 @@ export const addUrlsToModule = async ( req, res ) => {
             return res.status( 404 ).send( 'Module not found in this course' );
         }
 
-        if ( !Array.isArray( videos ) ) {
-            return res.status( 400 ).send( 'Formato invalido' );
-        }
-
         // Add new URLs without overwriting existing ones
         module.videos = module.videos.concat( videos.filter( url => module.videos.indexOf( url ) === -1 ) );
 
