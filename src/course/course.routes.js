@@ -3,7 +3,7 @@ import { check } from 'express-validator';
 import { validateFields } from '../middlewares/validateFields.js';
 import { validarJWT } from '../middlewares/validar-jwt.js';
 import { coursePost, coursePut, courseGet, courseDelete, getCourseById, deleteVideo, getVideos, uploadVideo, courseGetAlumno } from './course.controller.js';
-import upload from './upload.js';
+//import upload from './upload.js';
 
 
 const router = Router();
@@ -38,12 +38,12 @@ router.delete(
         validarJWT,
     ], courseDelete );
 
-router.post(
+/*router.post(
     "/:id/modules/:moduleId",
     validarJWT,
     upload.array( 'videos', 10 ),
     uploadVideo
-);
+);*/
 
 router.get(
     "/:id/modules/:moduleId/videos",
