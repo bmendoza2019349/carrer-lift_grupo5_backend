@@ -38,6 +38,7 @@ class Server {
         this.app.use( morgan( 'dev' ) );
         //apiLimiter
         this.app.use( apiLimiter );
+        this.app.use( '/uploads', express.static( 'uploads' ) )
 
     };
 
