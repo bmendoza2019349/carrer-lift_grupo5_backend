@@ -5,7 +5,7 @@ import Course from '../course/course.model.js';
 export const postModule = async ( req, res ) => {
     try {
         const { id } = req.params;
-        const { nameModule, archivos, descriptionModule, exams, state } = req.body;
+        const { nameModule, descriptionModule, exams, state } = req.body;
         const userEmail = req.user.email; // Obteniendo el email del token
 
         const course = await Course.findById( id );
@@ -18,9 +18,11 @@ export const postModule = async ( req, res ) => {
             return res.status( 403 ).send( 'Only the course creator can add modules' );
         }
 
+        const videos = req.files ? req.files.map( file => `/uploads/${file.filename}` ) : []
+
         const newModule = {
             nameModule,
-            archivos,
+            videos,
             descriptionModule,
             exams,
             state
@@ -182,7 +184,7 @@ export const getModuleById = async ( req, res ) => {
 export const addUrlsToModule = async ( req, res ) => {
     try {
         const { id, moduleId } = req.params;
-        const { archivos } = req.body; // Assume archivos is an array of URLs
+        const { videos } = req.files;
         const userEmail = req.user.email; // Obteniendo el email del token
 
         const course = await Course.findById( id );
@@ -200,12 +202,12 @@ export const addUrlsToModule = async ( req, res ) => {
             return res.status( 404 ).send( 'Module not found in this course' );
         }
 
-        if ( !Array.isArray( archivos ) ) {
-            return res.status( 400 ).send( 'Invalid format for archivos' );
+        if ( !Array.isArray( videos ) ) {
+            return res.status( 400 ).send( 'Formato invalido' );
         }
 
         // Add new URLs without overwriting existing ones
-        module.archivos = module.archivos.concat( archivos.filter( url => module.archivos.indexOf( url ) === -1 ) );
+        module.videos = module.videos.concat( videos.filter( url => module.videos.indexOf( url ) === -1 ) );
 
         await course.save();
 

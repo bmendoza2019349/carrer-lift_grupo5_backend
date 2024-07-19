@@ -15,6 +15,11 @@ const moduleSchema = new mongoose.Schema( {
     },
     videos: [{
         type: String,
+        validate: function ( val ) {
+            const regex = /^(ftp|http|https):\/\/[^ "]+$/
+            return regex.test( val ) || val.starsWith( '/uploads/' )
+        },
+        message: 'Url invalida o ruta de archivo invalida'
     }],
     descriptionModule: {
         type: String,
