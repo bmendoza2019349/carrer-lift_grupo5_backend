@@ -157,7 +157,7 @@ export const uploadVideo = async ( req, res ) => {
 
         // Agregar los nombres de los archivos al módulo
         files.forEach( file => {
-            const url = `/uploads/${file.filename}`
+            const url = `/uploads/${file.filename}`;
             course.modulos[moduleIndex].videos.push( url );
         } );
 
@@ -175,7 +175,7 @@ export const getVideos = async ( req, res ) => {
     try {
         const { id, moduleId } = req.params; // ID del módulo
         const course = await Course.findById( id );
-        const module = course.modulos.findIndex( modules => modules._id.toString() === moduleId )
+        const module = course.modulos.find( modules => modules._id.toString() === moduleId )
 
         if ( module === -1 ) {
             return res.status( 404 ).send( { msg: 'Module not found' } );
@@ -193,7 +193,7 @@ export const deleteVideo = async ( req, res ) => {
     try {
         const { id, moduleId, videoName } = req.params; // ID del módulo
         const course = await Course.findById( id );
-        const module = course.modulos.findIndex( modules => modules._id.toString() === moduleId )
+        const module = course.modulos.find( modules => modules._id.toString() === moduleId )
 
         module.videos = module.videos.filter( video => video !== videoName );
 

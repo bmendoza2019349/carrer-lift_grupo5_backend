@@ -8,40 +8,40 @@ import upload from './upload.js';
 
 const router = Router();
 
-router.get("/", validarJWT, courseGet);
-router.get("/:id", check("id", "The course id is invalid").isMongoId(), validateFields, getCourseById);
+router.get( "/", validarJWT, courseGet );
+router.get( "/:id", check( "id", "The course id is invalid" ).isMongoId(), validateFields, getCourseById );
 
 router.post(
     "/",
     [
-        check("nameCourse", "The course name is required").not().isEmpty(),
-        check("descripcion", "The course description is required").not().isEmpty(),
+        check( "nameCourse", "The course name is required" ).not().isEmpty(),
+        check( "descripcion", "The course description is required" ).not().isEmpty(),
         validateFields,
         validarJWT,
-    ], coursePost);
+    ], coursePost );
 
 
 
 router.put(
     "/:id",
     [
-        check("id", "The course ID must be a valid MongoDB format").isMongoId(),
+        check( "id", "The course ID must be a valid MongoDB format" ).isMongoId(),
         validateFields,
         validarJWT,
-    ], coursePut);
+    ], coursePut );
 
 router.delete(
     "/:id",
     [
-        check("id", "The course ID must be a valid MongoDB format").isMongoId(),
+        check( "id", "The course ID must be a valid MongoDB format" ).isMongoId(),
         validateFields,
         validarJWT,
-    ], courseDelete);
+    ], courseDelete );
 
 router.post(
     "/:id/modules/:moduleId",
     validarJWT,
-    upload.array('videos', 1), // Hasta 10 videos
+    upload.array( 'videos', 10 ),
     uploadVideo
 );
 
@@ -57,6 +57,6 @@ router.delete(
     deleteVideo
 );
 
-router.get("/alumno", courseGetAlumno, validarJWT);
+router.get( "/alumno", courseGetAlumno, validarJWT );
 
 export default router;
