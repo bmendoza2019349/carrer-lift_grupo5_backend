@@ -5,7 +5,7 @@ import Course from '../course/course.model.js';
 export const postModule = async ( req, res ) => {
     try {
         const { id } = req.params;
-        const { nameModule, descriptionModule, exams, state } = req.body;
+        const { nameModule, videos, descriptionModule, exams, state } = req.body;
         const userEmail = req.user.email; // Obteniendo el email del token
 
         const course = await Course.findById( id );
@@ -17,8 +17,6 @@ export const postModule = async ( req, res ) => {
         if ( course.userCreator !== userEmail ) {
             return res.status( 403 ).send( 'Only the course creator can add modules' );
         }
-
-        const videos = req.files ? req.files.map( file => `/uploads/${file.filename}` ) : []
 
         const newModule = {
             nameModule,
@@ -184,7 +182,7 @@ export const getModuleById = async ( req, res ) => {
 export const addUrlsToModule = async ( req, res ) => {
     try {
         const { id, moduleId } = req.params;
-        const { videos } = req.files;
+        const { videos } = req.body;
         const userEmail = req.user.email; // Obteniendo el email del token
 
         const course = await Course.findById( id );

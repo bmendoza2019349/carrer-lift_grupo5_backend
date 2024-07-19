@@ -40,5 +40,14 @@ router.patch(
     editUrlModule
 );
 
+router.patch(
+    '/:courseId/module/:moduleId/urls',
+    [
+        validarJWT,
+        validateFields,
+    ],
+    addUrlsToModule
+);
+
 
 export default router;

@@ -30,30 +30,31 @@ export const register = async ( req, res ) => {
   }
 };
 
-export const login = async (req, res) => {
+export const login = async ( req, res ) => {
   const { email, password } = req.body;
 
   try {
     //verificar si el email existe:
-    const user = await User.findOne({ email });
+    const user = await User.findOne( { email } );
 
-    if(user && (await bcryptjs.compare(password, user.password))){
-      const token = await generarJWT(user.id, user.email, user.roleUser)
+    if ( user && ( await bcryptjs.compare( password, user.password ) ) ) {
+      const token = await generarJWT( user.id, user.email, user.roleUser )
       console.log()
-      res.status(200).json({
+      res.status( 200 ).json( {
         msg: "Login Ok!!!",
         userDetails: {
           username: user.username,
           roleUser: user.roleUser,
+          email: user.email,
           token: token
         },
-      });
+      } );
     }
 
-  
-   
-  } catch (e) {
-    res.status(500).send("Comuniquese con el administrador");
+
+
+  } catch ( e ) {
+    res.status( 500 ).send( "Comuniquese con el administrador" );
   }
 };
 
