@@ -7,7 +7,7 @@ import { validarJWT } from "../middlewares/validar-jwt.js";
 const router = Router();
 
 router.post(
-    "/:id/module",
+    "/:id",
     [
         check( "nameModule", "The course name is required" ).not().isEmpty(),
         check( "descriptionModule", "The course description is required" ).not().isEmpty(),
@@ -28,12 +28,6 @@ router.delete( '/:id/:moduleId', [validarJWT], deleteModule );
 
 router.get( '/courses/:id/modules/:moduleId', getModuleById );
 
-router.patch( '/editContent/:id/:moduleId', [
-    validarJWT,
-    validateFields,
-    // check an array of urls called archivos
-    check( 'archivos' ).isURL().withMessage( 'Invalid URL' ),
-], addUrlsToModule );
 
 router.patch(
     '/editUrl/:id/:moduleId',

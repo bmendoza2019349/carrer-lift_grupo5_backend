@@ -1,5 +1,8 @@
 import { response, request } from "express";
+import fs from 'fs';
+import path from 'path';
 import Course from '../course/course.model.js';
+import Module from '../course/course.model.js';
 import Users from "../users/user.model.js";
 
 export const coursePost = async ( req, res ) => {
@@ -9,8 +12,8 @@ export const coursePost = async ( req, res ) => {
 
         // Verificar si el usuario tiene el rol de "profesor"
 
-        if ( req.user.roleUser !== 'profesor' ) {
-            return res.status( 403 ).send( 'Only professors can add courses' );
+        if (req.user.roleUser !== 'profesor' && req.user.roleUser !== 'superAdmin') {
+            return res.status(403).send('Only professors and superAdmins can add courses');
         }
 
         const course = new Course( { userCreator, nameCourse, descripcion, img } );
@@ -131,3 +134,101 @@ export const getCourseById = async ( req, res ) => {
         res.status( 500 ).send( 'Internal Server Error course' );
     }
 }
+
+export const uploadVideo = async (req, res) => {
+    try {
+        const { id, moduleId } = req.params; // ID del curso y del módulo
+        const files = req.files;
+
+        // Verificar si se recibieron archivos
+        if (!files || !Array.isArray(files) || files.length === 0) {
+            return res.status(400).send('No video files were uploaded');
+        }
+
+        const course = await Course.findById(id);
+        if (!course) {
+            return res.status(404).send({ msg: 'Course not found' });
+        }
+
+        const moduleIndex = course.modulos.findIndex(module => module._id.toString() === moduleId);
+        if (moduleIndex === -1) {
+            return res.status(404).send({ msg: 'Module not found' });
+        }
+
+        // Agregar los nombres de los archivos al módulo
+        files.forEach(file => {
+            course.modulos[moduleIndex].videos.push(file.filename);
+        });
+
+        await course.save();
+
+        res.status(200).json({ module: course.modulos[moduleIndex] });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+// Controlador para obtener los videos de un módulo
+export const getVideos = async (req, res) => {
+    try {
+        const { id, moduleId } = req.params; // ID del módulo
+        const course = await Course.findById( id );
+        const module = course.modulos.findIndex(modules => modules._id.toString() === moduleId)
+
+        if (module === -1) {
+            return res.status(404).send({msg: 'Module not found'});
+        }
+
+        res.status(200).json({ videos: module.videos });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+// Controlador para eliminar un video
+export const deleteVideo = async (req, res) => {
+    try {
+        const { id, moduleId, videoName } = req.params; // ID del módulo
+        const course = await Course.findById( id );
+        const module = course.modulos.findIndex(modules => modules._id.toString() === moduleId)
+
+        module.videos = module.videos.filter(video => video !== videoName);
+
+        await module.save();
+
+        // Eliminar el archivo físicamente
+        fs.unlinkSync(path.join('uploads', videoName));
+
+        res.status(200).send('Video deleted successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+export const courseGetAlumno = async (req, res) => {
+    try {
+        const user = req.user; // Obtener el usuario desde el token
+        if (!user || user.roleUser !== 'alumno') {
+            return res.status(403).send('Only students can access their assigned courses');
+        }
+
+        // Obtener el usuario con los cursos poblados
+        const userWithCourses = await Users.findOne({ email: user.email }).populate('courses');
+
+        if (!userWithCourses) {
+            return res.status(404).send('User not found');
+        }
+
+        const courses = userWithCourses.courses;
+
+        res.status(200).json({
+            courses
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal Server Error course');
+    }
+};

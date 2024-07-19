@@ -13,16 +13,8 @@ const moduleSchema = new mongoose.Schema( {
         sparse: true,
         default: null
     },
-
-    archivos: [{
+    videos: [{
         type: String,
-        validate: {
-            validator: function ( val ) {
-                const urlRegex = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/;
-                return urlRegex.test( val );
-            },
-            message: 'Invalid URL'
-        }
     }],
     descriptionModule: {
         type: String,

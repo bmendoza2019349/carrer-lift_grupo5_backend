@@ -1,5 +1,5 @@
 import bcryptjs from 'bcryptjs';
-import Users from '../users/user.model.js';
+import User from '../users/user.model.js';
 import Course from '../course/course.model.js';
 import { generarJWT } from '../helpers/generate-JWT.js';
 
@@ -8,7 +8,7 @@ export const register = async ( req, res ) => {
     const { email, username, password, roleUser } = req.body;
     const encryptedPassword = bcryptjs.hashSync( password );
 
-    const user = await Users.create( {
+    const user = await User.create( {
       username,
       email: email.toLowerCase(),
       password: encryptedPassword,
@@ -30,36 +30,30 @@ export const register = async ( req, res ) => {
   }
 };
 
-export const login = async ( req, res ) => {
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
+    //verificar si el email existe:
+    const user = await User.findOne({ email });
 
-    const user = await Users.findOne( { email: email.toLowerCase() } );
-
-    if ( !user ) {
-      return res
-        .status( 400 )
-        .send( `Wrong credentials, ${email} doesn't exists en database` );
+    if(user && (await bcryptjs.compare(password, user.password))){
+      const token = await generarJWT(user.id, user.email, user.roleUser)
+      console.log()
+      res.status(200).json({
+        msg: "Login Ok!!!",
+        userDetails: {
+          username: user.username,
+          roleUser: user.roleUser,
+          token: token
+        },
+      });
     }
 
-    const validPassword = bcryptjs.compareSync( password, user.password );
-
-    if ( !validPassword ) {
-      return res.status( 400 ).send( "wrong password" );
-    }
-
-    const token = await generarJWT( user.id, user.email, user.roleUser, user.username );
-
-    res.status( 200 ).json( {
-      msg: "Login Ok!!!",
-      userDetails: {
-        username: user.username,
-        roleUser: user.roleUser,
-        token: token,
-      },
-    } );
-  } catch ( e ) {
-    res.status( 500 ).send( "Comuniquese con el administrador" );
+  
+   
+  } catch (e) {
+    res.status(500).send("Comuniquese con el administrador");
   }
 };
 

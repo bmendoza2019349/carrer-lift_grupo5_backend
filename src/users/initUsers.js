@@ -37,20 +37,6 @@ const defaultUsers = [
       password: "123456",
       roleUser: "superAdmin",
       stateUser: true,
-    },
-    {
-      email: "admin@gmail.com",
-      username: "profesorrs",
-      password: "123456",
-      roleUser: "profesor",
-      stateUser: true,
-    },
-    {
-      email: "alumno@gmail.com",
-      username: "alumno",
-      password: "123456",
-      roleUser: "alumno",
-      stateUser: true,
     }
   ];
   
